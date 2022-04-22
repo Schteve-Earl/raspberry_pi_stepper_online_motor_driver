@@ -1,0 +1,10 @@
+#goal definition
+bool direction
+float32 speed
+float32 rotation
+---
+#result definition
+uint8 result
+---
+#feedback
+
