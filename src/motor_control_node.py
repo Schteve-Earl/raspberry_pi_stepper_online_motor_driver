@@ -11,12 +11,10 @@ class MotorControl(object):
         self.__as = actionlib.SimpleActionServer("/stepper_motor_control", action.ControlMotor, self.__callback())
         self.pulses_per_rotation_ = rospy.get_param("/motor_parameters/pulses_per_rotation")
 
-
     def __callback(self, goal):
         result = action.ControlMotorResult
         result.result = self.__execute_move()
         self.__as.set_succeeded(result)
-        
 
     def __set_direction(self, direction: int):
         self.direction_ = direction
@@ -30,6 +28,8 @@ class MotorControl(object):
         self.rotation_ = self.__convert_rotation_to_pulse(rotation)
 
     def __execute_move(self):
+        if self.direction_ == 0:
+
         current_pulse = 0
         while current_pulse < self.rotation_:
 
