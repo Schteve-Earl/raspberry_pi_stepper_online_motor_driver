@@ -1,0 +1,5 @@
+<launch>
+    <node pkg="rpi_stepper_motor_driver" type="motor_control_node.py" name="rpi_stepper_motor_driver" output="screen">
+        <rosparam file="$(find rpi_stepper_motor_driver)/config/motor_parameters.yaml" command="load"/>
+    </node>
+</launch>
