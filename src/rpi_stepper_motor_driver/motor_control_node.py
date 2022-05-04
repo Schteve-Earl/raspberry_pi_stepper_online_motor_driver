@@ -2,36 +2,38 @@
 
 import rospy
 import actionlib
+import time
 import rpi_stepper_motor_driver.msg
 
-
+# Import GPIO if on raspberry pi
+if not rospy.get_param("/rpi_stepper_motor_driver/driver_parameters/sim"):
+    import RPi.GPIO as GPIO
 
 class MotorControl(object):
     def __init__(self):
         self.motor_as = actionlib.SimpleActionServer("stepper_motor_control", rpi_stepper_motor_driver.msg.ControlMotorAction, self.callback)
-
+        self.direction_pin_ = None
         self.load_parameters()
 
         # GPIO only works on RPi, so only load and configure if on a raspberry pi
         if not self.sim_:
-            import RPi.GPIO as GPIO
             self.set_gpio_pins()
 
     def load_parameters(self):
         # Driver Parameters
-        self.sim_ = rospy.get_param("/rpi_stepper_motor_driver/driver_parameters/sim")
         self.minimum_speed_ = rospy.get_param("/rpi_stepper_motor_driver/driver_parameters/minimum_speed")
-
+        self.sim_ = rospy.get_param("/rpi_stepper_motor_driver/driver_parameters/sim")
         # Motor parameters
         self.pulses_per_rotation_ = rospy.get_param("/rpi_stepper_motor_driver/motor_parameters/pulses_per_rotation")
-        self.step_pin = rospy.get_param("/rpi_stepper_motor_driver/controller_paramters/step_pin")
-        self.direction_pin = rospy.get_param("/rpi_stepper_motor_driver/controller_paramters/direction_pin")
+        self.step_pin_ = rospy.get_param("/rpi_stepper_motor_driver/controller_paramters/step_pin")
+        self.direction_pin_ = rospy.get_param("/rpi_stepper_motor_driver/controller_paramters/direction_pin")
         
         
     def set_gpio_pins(self):
         GPIO.setmode(GPIO.BOARD)
-        GPIO.setup(self.step_pin, GPIO.OUT)
-        GPIO.setup(self.direction_pin, GPIO.OUT)
+        GPIO.setup(self.step_pin_, GPIO.OUT)
+        GPIO.setup(self.direction_pin_, GPIO.OUT)
+        GPIO.setwarnings(False)
 
     def callback(self, goal):
         result = rpi_stepper_motor_driver.msg.ControlMotorResult()
@@ -44,10 +46,13 @@ class MotorControl(object):
         result.result = self.execute_move()
         self.motor_as.set_succeeded(result)
 
-    def set_direction(self, direction: int):
+    def set_direction(self, direction: bool):
         self.direction = direction
         if not self.sim_:
-            GPIO.output(self.direction_pin, self.direction)
+            if self.direction == True:
+                GPIO.output(self.direction_pin_, GPIO.HIGH)
+            else:
+                GPIO.output(self.direction_pin_, GPIO.LOW)
         return True
 
     def set_speed(self, speed: float):
@@ -68,9 +73,10 @@ class MotorControl(object):
         current_pulse = 0
         while current_pulse < self.rotation_:
             if not self.sim_:
-                GPIO.output(self.step_pin, GPIO.HIGH)
-                GPIO.output(self.step_pin, GPIO.LOW)
-            rospy.sleep(self.dwell_time)
+                GPIO.output(self.step_pin_, GPIO.HIGH)
+                rospy.sleep(self.dwell_time/2)
+                GPIO.output(self.step_pin_, GPIO.LOW)
+                rospy.sleep(self.dwell_time/2)
             current_pulse += 1
         return True
 

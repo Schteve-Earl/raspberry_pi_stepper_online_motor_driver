@@ -1,10 +1,10 @@
 driver_parameters:
-  sim: True # Allows for testing on non-RPi computer
+  sim: False # Allows for testing on non-RPi computer
   minimum_speed: 0.01 # rad/s
 
 motor_parameters:
   pulses_per_rotation: 400
 
 controller_paramters:
-  step_pin: 0
-  direction_pin: 0
+  step_pin: 15
+  direction_pin: 16
