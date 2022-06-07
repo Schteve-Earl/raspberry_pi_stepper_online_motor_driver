@@ -1,5 +1,5 @@
 driver_parameters:
-  sim: False # Allows for testing on non-RPi computer
+  sim: True # Allows for testing on non-RPi computer
   minimum_speed: 0.01 # rad/s
 
 motor_parameters:

@@ -11,7 +11,8 @@ if not rospy.get_param("/rpi_stepper_motor_driver/driver_parameters/sim"):
 
 class MotorControl(object):
     def __init__(self):
-        self.motor_as = actionlib.SimpleActionServer("stepper_motor_control", rpi_stepper_motor_driver.msg.ControlMotorAction, self.callback)
+        self.motor_as = actionlib.SimpleActionServer("stepper_motor_control", rpi_stepper_motor_driver.msg.ControlMotorAction, self.callback, auto_start=False)
+        self.motor_as.start()
         self.direction_pin_ = None
         self.load_parameters()
 
@@ -27,7 +28,6 @@ class MotorControl(object):
         self.pulses_per_rotation_ = rospy.get_param("/rpi_stepper_motor_driver/motor_parameters/pulses_per_rotation")
         self.step_pin_ = rospy.get_param("/rpi_stepper_motor_driver/controller_paramters/step_pin")
         self.direction_pin_ = rospy.get_param("/rpi_stepper_motor_driver/controller_paramters/direction_pin")
-        
         
     def set_gpio_pins(self):
         GPIO.setmode(GPIO.BOARD)
